@@ -1,0 +1,6 @@
+{
+  "name": "Block Blast",
+  "description": "An additive and highly satisfying 8x8 block puzzle game with colorful visual effects, smooth mechanics, combo multipliers, sound effects, and high-scores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

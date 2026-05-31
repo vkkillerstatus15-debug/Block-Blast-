@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Block Blast</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for sophisticated display headers -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Floating Particle Canvas for beautiful visual explosions -->
+        <canvas id="particle-canvas" class="particle-canvas"></canvas>
+
+        <header class="game-header">
+            <div class="logo-area">
+                <span class="logo-block blue"></span>
+                <span class="logo-block orange"></span>
+                <div class="logo-text-wrapper">
+                    <h1 class="logo-text">BLOCK<span class="txt-highlight">BLAST</span></h1>
+                    <span id="header-difficulty-badge" class="difficulty-badge easy">EASY Mode (1.0x)</span>
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card current">
+                    <span class="stat-label">SCORE</span>
+                    <span id="score-val" class="stat-value">0</span>
+                    <div id="score-popup" class="floating-popup"></div>
+                </div>
+                <div class="stat-card high">
+                    <span class="stat-label">BEST</span>
+                    <span id="high-score-val" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="controls-area">
+                <button id="btn-music" class="icon-button" title="Toggle Music">
+                    <svg viewBox="0 0 24 24" class="svg-icon" id="music-icon">
+                        <path fill="currentColor" d="M12,3V12.26C11.5,12.09 11,12 10.5,12C8,12 6,14 6,16.5C6,19 8,21 10.5,21C13,21 15,19 15,16.5V6H19V3H12Z" />
+                    </svg>
+                </button>
+                <button id="btn-sound" class="icon-button" title="Toggle Sound Effects">
+                    <svg viewBox="0 0 24 24" class="svg-icon" id="sound-icon">
+                        <path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.03,19.86 21,16.28 21,12C21,7.72 18.03,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.77 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                    </svg>
+                </button>
+                <button id="btn-pause" class="icon-button" title="Pause Game">
+                    <svg viewBox="0 0 24 24" class="svg-icon">
+                        <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                    </svg>
+                </button>
+                <button id="btn-restart" class="icon-button" title="Restart Game">
+                    <svg viewBox="0 0 24 24" class="svg-icon">
+                        <path fill="currentColor" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Combo banner for screen announcements -->
+        <div id="combo-banner-container" class="combo-banner-container">
+            <div id="combo-banner" class="combo-banner">DOUBLE CLEAR!</div>
+        </div>
+
+        <main class="game-board-container">
+            <!-- 8x8 Grid Board -->
+            <div id="board" class="board">
+                <!-- 64 cells generated via JavaScript -->
+            </div>
+        </main>
+
+        <!-- Power-Ups Dock Section -->
+        <div class="powerups-dock-container">
+            <div id="target-banner" class="target-banner">Target Mode: Tap a cell on the board!</div>
+            <div class="powerups-dock">
+                <button id="pu-bomb" class="powerup-btn" title="Bomb Blast: clear a 3x3 area">
+                    <div class="pu-badge-wrapper">
+                        <span class="pu-badge" id="pu-bomb-count">0</span>
+                    </div>
+                    <span class="pu-icon">💣</span>
+                    <span class="pu-label">3x3 Blast</span>
+                </button>
+                <button id="pu-line" class="powerup-btn" title="Line Sweeper: clear a row and column">
+                    <div class="pu-badge-wrapper">
+                        <span class="pu-badge" id="pu-line-count">0</span>
+                    </div>
+                    <span class="pu-icon">🧹</span>
+                    <span class="pu-label">Sweeper</span>
+                </button>
+                <button id="pu-color" class="powerup-btn" title="Chroma Wave: clear all blocks of a color">
+                    <div class="pu-badge-wrapper">
+                        <span class="pu-badge" id="pu-color-count">0</span>
+                    </div>
+                    <span class="pu-icon">🌈</span>
+                    <span class="pu-label">Chroma</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tray for remaining shape blocks -->
+        <footer class="game-tray-container">
+            <div id="tray" class="tray">
+                <div class="tray-slot" id="slot-0"></div>
+                <div class="tray-slot" id="slot-1"></div>
+                <div class="tray-slot" id="slot-2"></div>
+            </div>
+        </footer>
+
+        <!-- Overlays -->
+        <!-- Start / Tap-to-play Overlay for Audio Unlock -->
+        <div id="start-overlay" class="overlay active">
+            <div class="overlay-card pulse">
+                <h2>BLOCK BLAST</h2>
+                <p>Blast rows & columns to rack up points! Drop glowing gems and trigger massive combos.</p>
+                
+                <div class="difficulty-selector">
+                    <span class="difficulty-title">SELECT DIFFICULTY:</span>
+                    <div class="difficulty-options">
+                        <button class="difficulty-btn active" data-diff="easy">
+                            <span class="diff-name">EASY</span>
+                            <span class="diff-desc">SIMPLE SHAPES • 1.0x</span>
+                        </button>
+                        <button class="difficulty-btn" data-diff="medium">
+                            <span class="diff-name">MEDIUM</span>
+                            <span class="diff-desc">STANDARD • 1.5x</span>
+                        </button>
+                        <button class="difficulty-btn" data-diff="hard">
+                            <span class="diff-name">HARD</span>
+                            <span class="diff-desc">EXTREME SHAPES • 3.0x</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="audio-selector">
+                    <span class="difficulty-title">AUDIO SETTINGS:</span>
+                    <div class="audio-options-row">
+                        <button class="audio-toggle-btn active" data-toggle="sfx" title="Toggle Sound Effects">
+                            <span class="audio-toggle-icon">🔊</span>
+                            <span class="audio-toggle-label">SOUNDS: ON</span>
+                        </button>
+                        <button class="audio-toggle-btn active" data-toggle="music" title="Toggle Music">
+                            <span class="audio-toggle-icon">🎵</span>
+                            <span class="audio-toggle-label">MUSIC: ON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="btn-start-play" class="btn-primary">PLAY GAME</button>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-overlay" class="overlay">
+            <div class="overlay-card">
+                <h2>GAME PAUSED</h2>
+                <p>Take a breath and plan your next strategic blast!</p>
+                
+                <div class="difficulty-selector">
+                    <span class="difficulty-title">CHANGE DIFFICULTY:</span>
+                    <div class="difficulty-options">
+                        <button class="difficulty-btn" data-diff="easy">
+                            <span class="diff-name">EASY</span>
+                            <span class="diff-desc">SIMPLE SHAPES • 1.0x</span>
+                        </button>
+                        <button class="difficulty-btn" data-diff="medium">
+                            <span class="diff-name">MEDIUM</span>
+                            <span class="diff-desc">STANDARD • 1.5x</span>
+                        </button>
+                        <button class="difficulty-btn" data-diff="hard">
+                            <span class="diff-name">HARD</span>
+                            <span class="diff-desc">EXTREME SHAPES • 3.0x</span>
+                        </button>
+                    </div>
+                    <div class="difficulty-warning">Warning: Changing difficulty starts a new game.</div>
+                </div>
+
+                <div class="audio-selector">
+                    <span class="difficulty-title">AUDIO SETTINGS:</span>
+                    <div class="audio-options-row">
+                        <button class="audio-toggle-btn active" data-toggle="sfx" title="Toggle Sound Effects">
+                            <span class="audio-toggle-icon">🔊</span>
+                            <span class="audio-toggle-label">SOUNDS: ON</span>
+                        </button>
+                        <button class="audio-toggle-btn active" data-toggle="music" title="Toggle Music">
+                            <span class="audio-toggle-icon">🎵</span>
+                            <span class="audio-toggle-label">MUSIC: ON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="btn-resume" class="btn-primary">RESUME</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-overlay" class="overlay">
+            <div class="overlay-card game-over">
+                <h2 class="game-over-title">NO MORE MOVES</h2>
+                <div class="game-over-scores">
+                    <div class="score-summary">
+                        <span class="label">FINAL SCORE</span>
+                        <span id="final-score" class="val">0</span>
+                    </div>
+                    <div class="score-summary highlight-score">
+                        <span class="label">BEST SCORE</span>
+                        <span id="final-best" class="val">0</span>
+                    </div>
+                </div>
+                <button id="btn-game-over-restart" class="btn-primary">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drag element placeholder template -->
+    <div id="drag-ghost" class="drag-ghost"></div>
+
+    <script src="game.js"></script>
+</body>
+</html>
